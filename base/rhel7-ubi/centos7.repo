@@ -1,3 +1,4 @@
+[centos]
 name=CentOS-7
 baseurl=http://ftp.heanet.ie/pub/centos/7/os/x86_64/
 enabled=1

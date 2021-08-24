@@ -1,5 +1,7 @@
 FROM registry.access.redhat.com/ubi7/ubi:7.9
 
+COPY centos7.repo /etc/yum.repos.d/
+
 ### base ###
 RUN yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
 yum install -y http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm && \
