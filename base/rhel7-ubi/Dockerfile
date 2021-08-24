@@ -1,16 +1,22 @@
-FROM buildpack-deps:focal
+FROM registry.access.redhat.com/ubi7/ubi:7.9
 
-COPY install-packages /usr/bin
+COPY install-packages /usr/local/bin
 
 ### base ###
-ARG DEBIAN_FRONTEND=noninteractive
+ARG RHEL_FRONTEND=noninteractive
+
+RUN yum install -y wget && cd /tmp && cd /tmp && wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && yum install -y epel-release-latest-7.noarch.rpm && yum clean all
 
 RUN yes | unminimize \
     && install-packages \
         zip \
         unzip \
         bash-completion \
-        build-essential \
+        bash-completion-extras \
+        gcc \
+        gcc-c++ \
+        kernel-devel \
+        make \
         ninja-build \
         htop \
         jq \
