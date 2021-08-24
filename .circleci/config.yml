@@ -15,7 +15,7 @@ jobs:
             apt update && apt install -y shellcheck pre-commit git
             pre-commit run --all-files
 
-  workspace-base:
+  workspace-ubuntu-base:
     docker:
       - image: docker:stable
     steps:
@@ -25,15 +25,33 @@ jobs:
           at: .
       - run:
           command: |
-            ./.circleci/build_image.sh base/Dockerfile gitpod/workspace-base
-            docker save gitpod/workspace-base -o workspace-base.tar
+            ./.circleci/build_image.sh base/Dockerfile gitpod/workspace-ubuntu-base
+            docker save gitpod/workspace-ubuntu-base -o workspace-ubuntu-base.tar
           no_output_timeout: 20m
       - persist_to_workspace:
           root: .
           paths:
-            - workspace-base.tar
+            - workspace-ubuntu-base.tar
 
-  workspace-full:
+  workspace-rhel7-ubi-base:
+    docker:
+      - image: docker:stable
+    steps:
+      - checkout
+      - setup_remote_docker
+      - attach_workspace:
+          at: .
+      - run:
+          command: |
+            ./.circleci/build_image.sh base/Dockerfile gitpod/workspace-rhel7-ubi-base
+            docker save gitpod/workspace-rhel7-ubi-base -o workspace-rhel7-ubi-base.tar
+          no_output_timeout: 20m
+      - persist_to_workspace:
+          root: .
+          paths:
+            - workspace-rhel7-ubi-base.tar
+
+  workspace-ubuntu-full:
     docker:
       - image: csweichel/dazzle:latest
     steps:
@@ -43,8 +61,8 @@ jobs:
           at: .
       - run:
           command: |
-            docker load -i workspace-base.tar
-            ./.circleci/dazzle_build_image.sh full/Dockerfile gitpod/workspace-full workspace-full.tar
+            docker load -i workspace-ubuntu-base.tar
+            ./.circleci/dazzle_build_image.sh full/Dockerfile gitpod/workspace-ubuntu-full workspace-ubuntu-full.tar
           no_output_timeout: 30m
       - run:
           name: Save test results
@@ -59,9 +77,9 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - workspace-full.tar
+            - workspace-ubuntu-full.tar
 
-  workspace-full-vnc:
+  workspace-ubuntu-full-vnc:
     docker:
       - image: docker:stable
     steps:
@@ -71,13 +89,13 @@ jobs:
           at: .
       - run:
           command: |
-            docker load -i workspace-full.tar
-            ./.circleci/build_image.sh full-vnc/Dockerfile gitpod/workspace-full-vnc
-            docker save gitpod/workspace-full-vnc -o workspace-full-vnc.tar
+            docker load -i workspace-ubuntu-full.tar
+            ./.circleci/build_image.sh full-vnc/Dockerfile gitpod/workspace-ubuntu-full-vnc
+            docker save gitpod/workspace-ubuntu-full-vnc -o workspace-ubuntu-full-vnc.tar
       - persist_to_workspace:
           root: .
           paths:
-            - workspace-full-vnc.tar
+            - workspace-ubuntu-full-vnc.tar
 
   mdbook:
     docker:
@@ -89,7 +107,7 @@ jobs:
           at: .
       - run:
           command: |
-            docker load -i workspace-full.tar
+            docker load -i workspace-ubuntu-full.tar
             ./.circleci/build_image.sh mdbook/Dockerfile gitpod/mdbook
           no_output_timeout: 30m
 
@@ -103,7 +121,7 @@ jobs:
           at: .
       - run:
           command: |
-            docker load -i workspace-full.tar
+            docker load -i workspace-ubuntu-full.tar
             ./.circleci/build_image.sh dotnet/Dockerfile gitpod/workspace-dotnet
           no_output_timeout: 60m
 
@@ -117,7 +135,7 @@ jobs:
           at: .
       - run:
           command: |
-            docker load -i workspace-full-vnc.tar
+            docker load -i workspace-ubuntu-full-vnc.tar
             ./.circleci/build_image.sh dotnet-vnc/Dockerfile gitpod/workspace-dotnet-vnc
           no_output_timeout: 30m
 
@@ -131,7 +149,7 @@ jobs:
           at: .
       - run:
           command: |
-            docker load -i workspace-full.tar
+            docker load -i workspace-ubuntu-full.tar
             ./.circleci/build_image.sh dotnet-lts/Dockerfile gitpod/workspace-dotnet-lts
           no_output_timeout: 60m
 
@@ -145,7 +163,7 @@ jobs:
           at: .
       - run:
           command: |
-            docker load -i workspace-full-vnc.tar
+            docker load -i workspace-ubuntu-full-vnc.tar
             ./.circleci/build_image.sh dotnet-lts-vnc/Dockerfile gitpod/workspace-dotnet-lts-vnc
           no_output_timeout: 30m
 
@@ -159,7 +177,7 @@ jobs:
           at: .
       - run:
           command: |
-            docker load -i workspace-full.tar
+            docker load -i workspace-ubuntu-full.tar
             ./.circleci/build_image.sh postgres/Dockerfile gitpod/workspace-postgres
           no_output_timeout: 30m
 
@@ -173,7 +191,7 @@ jobs:
           at: .
       - run:
           command: |
-            docker load -i workspace-full.tar
+            docker load -i workspace-ubuntu-full.tar
             ./.circleci/build_image.sh mysql/Dockerfile gitpod/workspace-mysql
           no_output_timeout: 30m
 
@@ -187,7 +205,7 @@ jobs:
           at: .
       - run:
           command: |
-            docker load -i workspace-full.tar
+            docker load -i workspace-ubuntu-full.tar
             ./.circleci/build_image.sh mongodb/Dockerfile gitpod/workspace-mongodb
 
   workspace-flutter:
@@ -200,7 +218,7 @@ jobs:
           at: .
       - run:
           command: |
-            docker load -i workspace-full.tar
+            docker load -i workspace-ubuntu-full.tar
             ./.circleci/build_image.sh flutter/Dockerfile gitpod/workspace-flutter
 
   workspace-gecko:
@@ -213,7 +231,7 @@ jobs:
           at: .
       - run:
           command: |
-            docker load -i workspace-full-vnc.tar
+            docker load -i workspace-ubuntu-full-vnc.tar
             ./.circleci/build_image.sh gecko/Dockerfile gitpod/workspace-gecko
           no_output_timeout: 60m
 
@@ -227,7 +245,7 @@ jobs:
           at: .
       - run:
           command: |
-            docker load -i workspace-full.tar
+            docker load -i workspace-ubuntu-full.tar
             ./.circleci/build_image.sh wasm/Dockerfile gitpod/workspace-wasm
           no_output_timeout: 30m
 
@@ -236,45 +254,45 @@ workflows:
   build-and-deploy:
     jobs:
       - validate-changes
-      - workspace-base:
+      - workspace-ubuntu-base:
           requires:
             - validate-changes
-      - workspace-full:
+      - workspace-ubuntu-full:
           requires:
-            - workspace-base
-      - workspace-full-vnc:
+            - workspace-ubuntu-base
+      - workspace-ubunut-full-vnc:
           requires:
-            - workspace-full
+            - workspace-ubuntu-full
       - mdbook:
           requires:
-            - workspace-full
+            - workspace-ubuntu-full
       - workspace-dotnet:
           requires:
-            - workspace-full
+            - workspace-ubuntu-full
       - workspace-dotnet-vnc:
           requires:
-            - workspace-full-vnc
+            - workspace-ubuntu-full-vnc
       - workspace-dotnet-lts:
           requires:
-            - workspace-full
+            - workspace-ubuntu-full
       - workspace-dotnet-lts-vnc:
           requires:
-            - workspace-full-vnc
+            - workspace-ubuntu-full-vnc
       - workspace-postgres:
           requires:
-            - workspace-full
+            - workspace-ubuntu-full
       - workspace-mysql:
           requires:
-            - workspace-full
+            - workspace-ubuntu-full
       - workspace-mongodb:
           requires:
-            - workspace-full
+            - workspace-ubuntu-full
       - workspace-flutter:
           requires:
-            - workspace-full
+            - workspace-ubuntu-full
       - workspace-gecko:
           requires:
-            - workspace-full-vnc
+            - workspace-ubuntu-full-vnc
       - workspace-wasm:
           requires:
-            - workspace-full
+            - workspace-ubuntu-full
