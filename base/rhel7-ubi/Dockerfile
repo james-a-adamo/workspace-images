@@ -5,7 +5,10 @@ COPY install-packages /usr/local/bin
 ### base ###
 ARG RHEL_FRONTEND=noninteractive
 
-RUN yum install -y wget && cd /tmp && cd /tmp && wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && yum install -y epel-release-latest-7.noarch.rpm && yum clean all
+RUN yum install -y wget && cd /tmp && cd /tmp && \
+yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
+yum install -y http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm && \
+yum clean all
 
 RUN yes | unminimize \
     && install-packages \
@@ -24,33 +27,32 @@ RUN yes | unminimize \
         locales \
         man-db \
         nano \
-        ripgrep \
-        software-properties-common \
+        cargo \
         sudo \
         time \
         emacs-nox \
         vim \
         multitail \
         lsof \
-        ssl-cert \
+        openssl \
         fish \
-        zsh \
-    && locale-gen en_US.UTF-8
+        git \
+        git-lfs
 
+RUN cargo install ripgrep
+
+ENV PATH="/root/.cargo/bin:/usr/local/bin/:$PATH"
 ENV LANG=en_US.UTF-8
-
-### Git ###
-RUN add-apt-repository -y ppa:git-core/ppa \
-    && install-packages git git-lfs
 
 ### Gitpod user ###
 # '-l': see https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user
-RUN useradd -l -u 33333 -G sudo -md /home/gitpod -s /bin/bash -p gitpod gitpod \
+RUN groupadd sudo && useradd -l -u 33333 -G sudo -md /home/gitpod -s /bin/bash -p gitpod gitpod \
     # passwordless sudo for users in the 'sudo' group
     && sed -i.bkp -e 's/%sudo\s\+ALL=(ALL\(:ALL\)\?)\s\+ALL/%sudo ALL=NOPASSWD:ALL/g' /etc/sudoers
 ENV HOME=/home/gitpod
 WORKDIR $HOME
 # custom Bash prompt
+RUN cd /uar/local/bin && wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
 RUN { echo && echo "PS1='\[\033[01;32m\]\u\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\]\$(__git_ps1 \" (%s)\") $ '" ; } >> .bashrc
 
 ### Gitpod user (2) ###
