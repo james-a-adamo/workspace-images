@@ -7,8 +7,7 @@ RUN yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.n
 yum install -y http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm && \
 yum clean all
 
-RUN yes | unminimize \
-    && install-packages \
+RUN yum install -y \
         wget \
         zip \
         unzip \
@@ -35,11 +34,9 @@ RUN yes | unminimize \
         openssl \
         fish \
         git \
-        git-lfs
+        git-lfs && \
+        yum clean all
 
-RUN cargo install ripgrep cargo-cache && cargo cache -a
-
-ENV PATH="/root/.cargo/bin:/usr/local/bin/:$PATH"
 ENV LANG=en_US.UTF-8
 
 ### Gitpod user ###
@@ -50,12 +47,16 @@ RUN useradd -l -u 33333 -G wheel -md /home/gitpod -s /bin/bash -p gitpod gitpod 
 ENV HOME=/home/gitpod
 WORKDIR $HOME
 # custom Bash prompt
-RUN cd /uar/local/bin && wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
-RUN { echo && echo "PS1='\[\033[01;32m\]\u\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\]\$(__git_ps1 \" (%s)\") $ '" ; } >> .bashrc && \
-    echo "source /usr/local/bin/git-prompt.sh" >> .bashrc
-
+RUN wget -P /usr/local/bin/ https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh && echo "source /usr/local/bin/git-prompt.sh" >> .bashrc && \
+    { echo && echo "PS1='\[\033[01;32m\]\u\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\]\$(__git_ps1 \" (%s)\") $ '" ; } >> .bashrc
+    
 ### Gitpod user (2) ###
 USER gitpod
+
+# Installing ripgrep and cargo-cache
+RUN cargo install ripgrep cargo-cache && cargo cache -a
+ENV PATH="$HOME/.cargo/bin:/usr/local/bin/:$PATH"
+
 # use sudo so that user does not get sudo usage info on (the first) login
 RUN sudo echo "Running 'sudo' for Gitpod: success" && \
     # create .bashrc.d folder and source it in the bashrc
